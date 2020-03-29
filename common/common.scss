@@ -1,0 +1,21 @@
+.custom-dropdown-menu {
+  // width: 170px;
+}
+.custom-latest-dropdown-header {
+  &:hover {
+    background-color: #f7cdc2 !important;
+    color: $quaternary !important;
+  }
+}
+
+.custom-latest-dropdown-row {
+  &.is-highlighted, &.is-selected {
+    background-color: $quaternary !important;
+    .texts {
+      .name{
+        color: #ffffff !important;
+      }
+
+    }
+  }
+}

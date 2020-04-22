@@ -3,6 +3,7 @@ import computed from 'ember-addons/ember-computed-decorators';
 import { alias } from "@ember/object/computed";
 import discourseComputed from "discourse-common/utils/decorators";
 import { inject as service } from "@ember/service";
+import DiscourseURL from "discourse/lib/url";
 
 export default DropdownSelectBoxComponent.extend({
   routing: service('-routing'),

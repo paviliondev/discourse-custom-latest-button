@@ -23,20 +23,26 @@ export default DropdownSelectBoxComponent.extend({
     return `${this.currentPath.replace(/\?.*/,'')}?${param}=${value}`;
   },
   
-  @discourseComputed("currentPath")
-  value(currentPath) {
-    const filter = currentPath.split('/l/')[1];
-    return this.changeFilter(filter || 'latest');
+  @discourseComputed('category')
+  isTemplateCategory(category) {
+    return category &&
+      category.id == this.siteSettings.composer_template_category;
+  },
+  
+  @discourseComputed("currentPath", "isTemplateCategory")
+  value(currentPath, isTemplateCategory) {
+    const baseFilter = currentPath.split('/l/')[1];
+    const defaultFilter = isTemplateCategory ? 'articles' : 'latest';
+    const filter = ['latest', 'articles'].indexOf(baseFilter) > -1 ? baseFilter : defaultFilter;
+    return this.changeFilter(filter);
   },
 
   modifyComponentForRow() {
     return "custom-latest-dropdown-row";
   },
 
-  @discourseComputed('currentPath', 'category')
-  content(currentPath, category) {
-    const isTemplateCategory = category &&
-      category.id == this.siteSettings.composer_template_category;
+  @discourseComputed('currentPath', 'isTemplateCategory')
+  content(currentPath, isTemplateCategory) {
     const latestId = isTemplateCategory ?
       this.changeFilter('articles') :
       this.changeQueryParam('order', 'created');

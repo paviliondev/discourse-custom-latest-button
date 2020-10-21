@@ -6,19 +6,21 @@ import { inject as service } from "@ember/service";
 import DiscourseURL from "discourse/lib/url";
 
 export default DropdownSelectBoxComponent.extend({
-  routing: service('-routing'),
-  params: alias('routing.router.currentState.routerJsState.fullQueryParams'),
+  router: service(),
   classNames: ["custom-dropdown-menu"],
   baseUrl: alias('baseHref'),
-  @discourseComputed('params', 'baseUrl')
-  value(params, baseUrl){
-    if(params['order'] && params['order'] === 'created'){
-      return `${baseUrl}?order=created`;
-    }
-    return `${baseUrl}`;
-  },
+  
   selectKitOptions: {
     headerComponent: "custom-latest-dropdown-header"
+  },
+  
+  changeFilter(url, filter) {
+    return `${url.replace(/\/l\/.*/,'')}/l/${filter}`;
+  },
+  
+  @discourseComputed("router.currentRoute")
+  value(currentRoute) {
+    return window.location.pathname;
   },
 
   modifyComponentForRow() {
@@ -33,11 +35,11 @@ export default DropdownSelectBoxComponent.extend({
         name: I18n.t(themePrefix('latest_dropdown_items.sort_by'))
       },
       {
-        id: `${baseUrl}`,
+        id: this.changeFilter(baseUrl, 'latest'),
         name: I18n.t(themePrefix('latest_dropdown_items.latest_activity'))
       },
       {
-        id: `${baseUrl}?order=created`,
+        id: this.changeFilter(baseUrl, 'articles'),
         name: I18n.t(themePrefix('latest_dropdown_items.latest_topics'))
       },
       {
@@ -50,7 +52,7 @@ export default DropdownSelectBoxComponent.extend({
 
   actions: {
     onSelect(item){
-      if(item != 'sort_by') {
+      if (item != 'sort_by') {
         DiscourseURL.routeTo(item);
       }
     }

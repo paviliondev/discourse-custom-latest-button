@@ -12,8 +12,8 @@ export default {
 const themeInit = (api) => {
   api.modifyClass("component:navigation-item", {
     @on('didReceiveAttrs')
-    changeTemplate(){
-      if(this.get('content.name') === "latest" && !this.site.mobileView) {
+    changeTemplate() {
+      if (this.get('content.name') === "latest" && !this.site.mobileView) {
         this.set('baseHref', this.get('content.href'));
         const template = api._lookupContainer('template:custom-latest-button');
         this.set('hrefLink', null)

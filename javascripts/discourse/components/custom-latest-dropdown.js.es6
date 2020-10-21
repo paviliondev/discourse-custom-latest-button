@@ -8,38 +8,50 @@ import DiscourseURL from "discourse/lib/url";
 export default DropdownSelectBoxComponent.extend({
   router: service(),
   classNames: ["custom-dropdown-menu"],
-  baseUrl: alias('baseHref'),
+  currentPath: alias('router.currentURL'),
+  category: alias('router.currentRoute.attributes.category'),
   
   selectKitOptions: {
     headerComponent: "custom-latest-dropdown-header"
   },
   
-  changeFilter(url, filter) {
-    return `${url.replace(/\/l\/.*/,'')}/l/${filter}`;
+  changeFilter(filter) {
+    return `${this.currentPath.replace(/\/l\/.*/,'')}/l/${filter}`;
   },
   
-  @discourseComputed("router.currentRoute")
-  value(currentRoute) {
-    return window.location.pathname;
+  changeQueryParam(param, value) {
+    return `${this.currentPath.replace(/\?.*/,'')}?${param}=${value}`;
+  },
+  
+  @discourseComputed("currentPath")
+  value(currentPath) {
+    const filter = currentPath.split('/l/')[1];
+    return this.changeFilter(filter || 'latest');
   },
 
   modifyComponentForRow() {
     return "custom-latest-dropdown-row";
   },
 
-  @discourseComputed('baseUrl')
-  content(baseUrl) {
+  @discourseComputed('currentPath', 'category')
+  content(currentPath, category) {
+    const isTemplateCategory = category &&
+      category.id == this.siteSettings.composer_template_category;
+    const latestId = isTemplateCategory ?
+      this.changeFilter('articles') :
+      this.changeQueryParam('order', 'created');
+        
     return [
       {
         id: 'sort_by',
         name: I18n.t(themePrefix('latest_dropdown_items.sort_by'))
       },
       {
-        id: this.changeFilter(baseUrl, 'latest'),
+        id: this.changeFilter('latest'),
         name: I18n.t(themePrefix('latest_dropdown_items.latest_activity'))
       },
       {
-        id: this.changeFilter(baseUrl, 'articles'),
+        id: latestId,
         name: I18n.t(themePrefix('latest_dropdown_items.latest_topics'))
       },
       {

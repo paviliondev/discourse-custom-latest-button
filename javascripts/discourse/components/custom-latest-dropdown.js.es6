@@ -15,12 +15,20 @@ export default DropdownSelectBoxComponent.extend({
     headerComponent: "custom-latest-dropdown-header"
   },
   
-  changeFilter(filter) {
-    return `${this.currentPath.replace(/\/l\/.*/,'')}/l/${filter}`;
+  changeFilter(path, filter) {
+    return `${path.replace(/\/l\/.*/,'')}/l/${filter}`;
   },
   
-  changeQueryParam(param, value) {
-    return `${this.currentPath.replace(/\?.*/,'')}?${param}=${value}`;
+  changeQueryParam(path, param, value) {
+    return `${path.replace(/\?.*/,'')}?${param}=${value}`;
+  },
+  
+  applyOrder(path, order, isTemplateCategory) {
+    if (isTemplateCategory) {
+      return this.changeQueryParam(path, 'order', 'activity');
+    } else {
+      return this.changeQueryParam(path, 'order', order);
+    }
   },
   
   @discourseComputed('category')
@@ -31,10 +39,22 @@ export default DropdownSelectBoxComponent.extend({
   
   @discourseComputed("currentPath", "isTemplateCategory")
   value(currentPath, isTemplateCategory) {
-    const baseFilter = currentPath.split('/l/')[1];
-    const defaultFilter = isTemplateCategory ? 'articles' : 'latest';
-    const filter = ['latest', 'articles'].indexOf(baseFilter) > -1 ? baseFilter : defaultFilter;
-    return this.changeFilter(filter);
+    let filter = isTemplateCategory ? 'articles' : 'latest';
+    
+    const pathFilter = /\/l\/(.*?)(\?|$)/i.exec(currentPath);
+    if (pathFilter && ['latest', 'articles'].indexOf(pathFilter[1]) > -1) {
+      filter = pathFilter[1];
+    }
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const order = urlParams.get('order') || 'activity';
+
+    let result = this.applyOrder(
+      this.changeFilter(currentPath, filter),
+      order,
+      isTemplateCategory
+    )
+    return result;
   },
 
   modifyComponentForRow() {
@@ -43,9 +63,19 @@ export default DropdownSelectBoxComponent.extend({
 
   @discourseComputed('currentPath', 'isTemplateCategory')
   content(currentPath, isTemplateCategory) {
-    const latestId = isTemplateCategory ?
-      this.changeFilter('articles') :
-      this.changeQueryParam('order', 'created');
+    const path = this.currentPath;
+    
+    let activityId = this.applyOrder(
+      this.changeFilter(path, 'latest'),
+      'activity',
+      isTemplateCategory
+    );
+    
+    let topicsId = this.applyOrder(
+      this.changeFilter(path, isTemplateCategory ? 'articles' : 'latest'),
+      'created',
+      isTemplateCategory
+    );
         
     return [
       {
@@ -53,11 +83,11 @@ export default DropdownSelectBoxComponent.extend({
         name: I18n.t(themePrefix('latest_dropdown_items.sort_by'))
       },
       {
-        id: this.changeFilter('latest'),
+        id: activityId,
         name: I18n.t(themePrefix('latest_dropdown_items.latest_activity'))
       },
       {
-        id: latestId,
+        id: topicsId,
         name: I18n.t(themePrefix('latest_dropdown_items.latest_topics'))
       },
       {

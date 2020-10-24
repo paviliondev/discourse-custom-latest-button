@@ -34,7 +34,8 @@ export default DropdownSelectBoxComponent.extend({
   @discourseComputed('category')
   isTemplateCategory(category) {
     return category &&
-      category.id == this.siteSettings.composer_template_category;
+      this.siteSettings.composer_template_category.split('|')
+        .include(category.id.toString());
   },
   
   @discourseComputed("currentPath", "isTemplateCategory")

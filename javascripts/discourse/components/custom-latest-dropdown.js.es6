@@ -16,7 +16,11 @@ export default DropdownSelectBoxComponent.extend({
   },
   
   changeFilter(path, filter) {
-    return `${path.replace(/\/l\/.*/,'')}/l/${filter}`;
+    if (/\/c\//.test(path)) {
+      return `${path.replace(/\/l\/.*/, '')}/l/${filter}`;
+    } else {
+      return `${path.replace(/\/$/, '')}/${filter}`;
+    }
   },
   
   changeQueryParam(path, param, value) {
@@ -38,8 +42,16 @@ export default DropdownSelectBoxComponent.extend({
         .includes(category.id.toString());
   },
   
+  @discourseComputed('currentPath')
+  customTopicLists(currentPath) {
+    return currentPath && currentPath.indexOf('/tag/') === -1;
+  },
+  
   @discourseComputed("currentPath", "isTemplateCategory")
   value(currentPath, isTemplateCategory) {
+    const customTopicLists = this.customTopicLists;
+    if (!customTopicLists) return currentPath;
+    
     let filter = isTemplateCategory ? 'articles' : 'latest';
     
     const pathFilter = /\/l\/(.*?)(\?|$)/i.exec(currentPath);
@@ -49,13 +61,12 @@ export default DropdownSelectBoxComponent.extend({
     
     const urlParams = new URLSearchParams(window.location.search);
     const order = urlParams.get('order') || 'activity';
-
-    let result = this.applyOrder(
+    
+    return this.applyOrder(
       this.changeFilter(currentPath, filter),
       order,
       isTemplateCategory
-    )
-    return result;
+    );
   },
 
   modifyComponentForRow() {
@@ -65,6 +76,7 @@ export default DropdownSelectBoxComponent.extend({
   @discourseComputed('currentPath', 'isTemplateCategory')
   content(currentPath, isTemplateCategory) {
     const path = this.currentPath;
+    const customTopicLists = this.customTopicLists;
     
     let activityId = this.applyOrder(
       this.changeFilter(path, 'latest'),
@@ -77,25 +89,42 @@ export default DropdownSelectBoxComponent.extend({
       'created',
       isTemplateCategory
     );
-        
-    return [
+    
+    let result = [
       {
         id: 'sort_by',
         name: I18n.t(themePrefix('latest_dropdown_items.sort_by'))
-      },
-      {
-        id: activityId,
-        name: I18n.t(themePrefix('latest_dropdown_items.latest_activity'))
-      },
-      {
-        id: topicsId,
-        name: I18n.t(themePrefix('latest_dropdown_items.latest_topics'))
-      },
+      }
+    ];
+    
+    if (!customTopicLists) {
+      result.push(
+        {
+          id: path,
+          name: I18n.t(themePrefix('latest_dropdown_items.latest_activity'))
+        }
+      );
+    } else {
+      result.push(...[
+        {
+          id: activityId,
+          name: I18n.t(themePrefix('latest_dropdown_items.latest_activity'))
+        },
+        {
+          id: topicsId,
+          name: I18n.t(themePrefix('latest_dropdown_items.latest_topics'))
+        }
+      ]);
+    }
+    
+    result.push(
       {
         id: `/search`,
         name: I18n.t(themePrefix('latest_dropdown_items.adv_search'))
       }
-    ];
+    );
+        
+    return result;
   },
 
 

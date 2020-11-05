@@ -38,7 +38,7 @@ export default DropdownSelectBoxComponent.extend({
   @discourseComputed('category')
   isTemplateCategory(category) {
     return category &&
-      this.siteSettings.composer_template_category.split('|')
+      this.siteSettings.rstudio_composer_template_category.split('|')
         .includes(category.id.toString());
   },
   

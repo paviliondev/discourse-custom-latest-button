@@ -3,14 +3,14 @@
 }
 .custom-latest-dropdown-header {
   &:hover {
-    background-color: #f7cdc2 !important;
-    color: $quaternary !important;
+    background-color: rgba(117, 170, 219, 0.09) !important;
+    color: rgb(77, 141, 201) !important;
   }
 }
 
 .custom-latest-dropdown-row {
   &.is-highlighted, &.is-selected {
-    background-color: $quaternary !important;
+    background-color: #4D8DC9 !important;
     .texts {
       .name{
         color: #ffffff !important;

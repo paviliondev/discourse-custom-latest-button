@@ -1,10 +1,8 @@
 {
   "name": "Custom Latest Button",
-  "about_url": null,
-  "license_url": null,
+  "about_url": "https://github.com/paviliondev/discourse-custom-latest-button",
+  "license_url": "https://github.com/paviliondev/discourse-custom-latest-button",
   "component": true,
-  "assets": {
-  },
-  "color_schemes": {
-  }
+  "assets": {},
+  "color_schemes": {}
 }
